@@ -11,7 +11,7 @@ class VitalsService:
     async def get_user_vitals(self, user_id: str) -> List[VitalsResponse]:
         """Get all vitals for a user"""
         try:
-            response = self.supabase.table("vitals").select("*").eq("user_id", user_id).order("created_at", desc=True).execute()
+            response = await self.supabase.table("vitals").select("*").eq("user_id", user_id).order("created_at", desc=True).execute()
             
             if response.data:
                 return [VitalsResponse(**vital) for vital in response.data]
@@ -33,7 +33,7 @@ class VitalsService:
                 "created_at": datetime.utcnow().isoformat()
             }
             
-            response = self.supabase.table("vitals").insert(vitals_data).execute()
+            response = await self.supabase.table("vitals").insert(vitals_data).execute()
             
             if response.data:
                 return VitalsResponse(**response.data[0])
@@ -46,20 +46,20 @@ class VitalsService:
         """Delete a vitals entry"""
         try:
             # First check if the vital belongs to the user
-            response = self.supabase.table("vitals").select("id").eq("id", vital_id).eq("user_id", user_id).execute()
+            response = await self.supabase.table("vitals").select("id").eq("id", vital_id).eq("user_id", user_id).execute()
             
             if not response.data:
                 raise HTTPException(status_code=404, detail="Vital not found or access denied")
             
             # Delete the vital
-            self.supabase.table("vitals").delete().eq("id", vital_id).eq("user_id", user_id).execute()
+            await self.supabase.table("vitals").delete().eq("id", vital_id).eq("user_id", user_id).execute()
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error deleting vitals: {str(e)}")
 
     async def get_vitals_summary(self, user_id: str) -> dict:
         """Get a summary of user's vitals"""
         try:
-            response = self.supabase.table("vitals").select("*").eq("user_id", user_id).order("created_at", desc=True).limit(10).execute()
+            response = await self.supabase.table("vitals").select("*").eq("user_id", user_id).order("created_at", desc=True).limit(10).execute()
             
             if not response.data:
                 return {
