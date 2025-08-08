@@ -63,7 +63,7 @@ class ChatService:
     async def _get_user_documents(self, user_id: str) -> List[dict]:
         """Get user's documents from database"""
         try:
-            response = self.supabase.table("documents").select("extracted_text, file_name").eq("user_id", user_id).execute()
+            response = await self.supabase.table("documents").select("extracted_text, file_name").eq("user_id", user_id).execute()
             return response.data if response.data else []
         except Exception as e:
             print(f"Error fetching user documents: {e}")
